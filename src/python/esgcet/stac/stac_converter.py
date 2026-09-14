@@ -30,23 +30,40 @@ class ESGSTACItem:
         # Callers should check si before creating ESGSTACItem
         self.stac_item = si
         
-    def remove_aggregate(self, site):
-        operations = []
-        if "reference_file" in self.stac_item.get("assets", {}) and site in self.stac_item["assets"]["reference_file"].get("alternate", {}):
-            path = f"/assets/reference_file/alternate/{site}"
-            operations.append({
-                    "op": "remove",
-                    "path": path
-                    })
-        elif "reference_file" in self.stac_item.get("assets", {}) and self.stac_item["assets"]["reference_file"]["alternate:name"] == site:
-            path = f"/assets/reference_file"
-            operations.append({
-                    "op": "remove",
-                    "path": path
-                    })
-        return operations
+    def remove_aggregate(self, site: str, agg_protocols: str | None = None) -> list:
 
-    def add_aggregate(self, aggprotocol, url, site):
+        if agg_protocols is not None:
+            agg_protocols = [agg_protocols]
+        else:
+            agg_protocols = list(ASSET_AGG_DESCRIPTIONS.keys())
+
+        path = None
+
+        located = False
+        for agg_protocol in agg_protocols:
+            if agg_protocol not in self.stac_item.get("assets", {}):
+                continue
+
+            if located:
+                raise ValueError(
+                    'Unable to remove unspecified aggregation assets where '
+                    'multiple assets are present.'
+                )
+            
+            located = True
+            if site in self.stac_item["assets"]["reference_file"].get("alternate", {}):
+                path = f"/assets/{agg_protocol}/alternate/{site}"
+            else:
+                path = f"/assets/{agg_protocol}"
+
+        if path is not None:
+            return [{
+                "op": "remove",
+                "path": path
+            }]
+        return []
+
+    def add_aggregate(self, aggprotocol: str, url: str, site: str) -> list:
 
         description = ASSET_AGG_DESCRIPTIONS.get(
             aggprotocol,"Kerchunk reference file for virtual aggregation")
@@ -75,13 +92,11 @@ class ESGSTACItem:
         if size is not None:
             value["file:size"] = size
 
-        operations = [{
+        return [{
             "op": "add",
             "path": path,
             "value": value
         }]
-
-        return operations
 
     def add_replica(self, rep_datanode, template, prefix, rep_globus=""):
         assets = self.stac_item.get("assets", {})

@@ -13,14 +13,14 @@ AUTOC_PATH = None
 # Asset Settings
 
 ASSET_AGG_DESCRIPTIONS = {
-    'kerchunk': "Kerchunk virtual aggregation reference file.",
+    'reference_file': "Kerchunk virtual aggregation reference file.",
     'cfa': "CF-Compliant NetCDF virtual aggregation file.",
     'zarr': "Cloud-native Zarr aggregation store.",
     'icechunk': "Transactional tensor storage engine for cloud-native dataset."
 }
 
 ASSET_AGG_TYPES = {
-    'kerchunk': "vnd.zarr+kerchunk",
+    'reference_file': "vnd.zarr+kerchunk",
     'cfa': "netcdf",
     'zarr': "vnd.zarr",
     'icechunk': "vnd.icechunk"
