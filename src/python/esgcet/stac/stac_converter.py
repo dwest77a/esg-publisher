@@ -8,9 +8,12 @@ from esgcet.util.settings import (
     STAC_list_properties,
     STAC_proj_item_properties,
     STAC_schema_versions,
+    ASSET_AGG_DESCRIPTIONS,
+    ASSET_AGG_TYPES
 )
 from esgvoc.apps.jsg import json_schema_generator as jsg
 from esgcet.util import logger
+from esgcet.util.get_size_remote_file import get_size
 
 
 log = logger.ESGPubLogger()
@@ -43,29 +46,40 @@ class ESGSTACItem:
                     })
         return operations
 
-    def add_aggregate(self, aggtype, url, site):
+    def add_aggregate(self, aggprotocol, url, site):
+
+        description = ASSET_AGG_DESCRIPTIONS.get(
+            aggprotocol,"Kerchunk reference file for virtual aggregation")
+
+        aggtype = ASSET_AGG_TYPES.get(
+            aggprotocol,'kerchunk')
+
         now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
         value = {
             "href": url,
             "type": f"application/{aggtype}",
             "role": ["data", "virtual"],
-            "description": "Kerchunk reference file for virtual aggregation",
+            "description": description,
             "alternate:name": site,
             "created": now,
             "updated": now,
-            "protocol": "kerchunk",
+            "protocol": aggprotocol,
         }
 
-        if "reference_file" in self.stac_item.get("assets", {}):
-            path = f"/assets/reference_file/alternate/{site}"
+        if aggprotocol in self.stac_item.get("assets", {}):
+            path = f"/assets/{aggprotocol}/alternate/{site}"
         else:
-            path = f"/assets/reference_file"
-        #    value["file:size"] =
+            path = f"/assets/{aggprotocol}"
+
+        size = get_size(url)
+        if size is not None:
+            value["file:size"] = size
+
         operations = [{
-                    "op": "add",
-                    "path": path,
-                    "value": value
-                    }]
+            "op": "add",
+            "path": path,
+            "value": value
+        }]
 
         return operations
 
