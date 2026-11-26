@@ -14,8 +14,8 @@ from typing import Any
 
 from compliance_checker.runner import CheckSuite, ComplianceChecker
 from pathlib import Path
-from esgcet.kerchunka.mapfile_model import MapFileRecord, MapFileCatalog
-from esgcet.kerchunka.kerchunk_generator import KerchunkGenerator
+from esgcet.kerchunk_process.mapfile_model import MapFileRecord, MapFileCatalog
+from esgcet.kerchunk_process.kerchunk_generator import KerchunkGenerator
 
 
 
@@ -288,7 +288,13 @@ class GenericPublisher(BasePublisher):
 
         project, source_attrs, path_0 = ...
 
+<<<<<<< HEAD
+        if kerchunk_uri:
+            out_json_data[-1]["kerchunk"] = kerchunk_uri
+        self.pid_cite()
+=======
         # Separately extract assets by paths individually.
+>>>>>>> esgvoc_publisher
 
         assets = {}
 
